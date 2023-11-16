@@ -1,33 +1,18 @@
-import { Route, Routes, Link } from 'react-router-dom';
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { Outlet, Link } from 'react-router-dom';
+import { useState, useEffect, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { getMovieById } from 'api';
 
-const Cast = lazy(() =>
-  import('./Cast').then(module => ({
-    default: module.Cast,
-  }))
-);
-const Reviews = lazy(() =>
-  import('./Reviews').then(module => ({
-    default: module.Reviews,
-  }))
-);
-
-export const MovieDetails = ({ currentMovieId }) => {
+export const MovieDetails = () => {
   const [currentMovie, setCurrentMovie] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
 
   const location = useLocation();
 
+  const movieId = location.pathname.split('/')[2];
+
   useEffect(() => {
-    let movieId = currentMovieId;
-
-    if (currentMovieId === undefined) {
-      movieId = location.pathname.split('/')[2];
-    }
-
     getMovieById(movieId)
       .then(response => {
         setCurrentMovie(response.data);
@@ -39,12 +24,12 @@ export const MovieDetails = ({ currentMovieId }) => {
 
         setIsLoaded(false);
       });
-  });
+  }, [movieId]);
 
   const navigate = useNavigate();
 
   const goBack = () => {
-    navigate(location.state.from);
+    navigate(location.state?.from);
   };
 
   return isLoaded ? (
@@ -66,17 +51,15 @@ export const MovieDetails = ({ currentMovieId }) => {
         }}
       >
         <img
-          src={`https://image.tmdb.org/t/p/w500/${currentMovie.poster_path}`}
+          src={`https://image.tmdb.org/t/p/w500/${
+            currentMovie.poster_path || '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'
+          }`}
           alt=""
           width={250}
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <h2>
-            {currentMovie.title !== undefined
-              ? currentMovie.title
-              : currentMovie.name}
-          </h2>
+          <h2>{currentMovie.title || currentMovie.name}</h2>
 
           <p>User score: {`${Math.floor(currentMovie.vote_average * 10)}%`}</p>
 
@@ -110,10 +93,7 @@ export const MovieDetails = ({ currentMovieId }) => {
       </ul>
 
       <Suspense fallback={<div>Loading.....</div>}>
-        <Routes>
-          <Route path="cast" element={<Cast id={currentMovie.id} />} />
-          <Route path="reviews" element={<Reviews id={currentMovie.id} />} />
-        </Routes>
+        <Outlet />
       </Suspense>
     </div>
   ) : (

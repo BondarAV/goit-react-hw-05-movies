@@ -1,18 +1,39 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { lazy } from 'react';
 
 import { Header } from './Header';
-import { Home } from './Home';
-import { MovieDetails } from './MovieDetails';
-import { Movies } from './Movies';
+
+const Home = lazy(() =>
+  import('./Pages/Home').then(module => ({
+    default: module.Home,
+  }))
+);
+
+const MovieDetails = lazy(() =>
+  import('./Pages/MovieDetails').then(module => ({
+    default: module.MovieDetails,
+  }))
+);
+
+const Movies = lazy(() =>
+  import('./Pages/Movies').then(module => ({
+    default: module.Movies,
+  }))
+);
+
+const Cast = lazy(() =>
+  import('./Cast').then(module => ({
+    default: module.Cast,
+  }))
+);
+
+const Reviews = lazy(() =>
+  import('./Reviews').then(module => ({
+    default: module.Reviews,
+  }))
+);
 
 export const App = () => {
-  const [currentMovieId, setCurrentMovieId] = useState();
-
-  const setCurrentMovie = id => {
-    setCurrentMovieId(id);
-  };
-
   return (
     <div
       style={{
@@ -20,35 +41,16 @@ export const App = () => {
         paddingRight: 20,
       }}
     >
-      <Header>
-        <nav
-          style={{
-            height: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 25,
-            fontSize: 20,
-            color: '#010101',
-          }}
-        >
-          <Link to="/">Home</Link>
-          <Link to="/movies" state={{ from: '/' }}>
-            Movies
-          </Link>
-        </nav>
-      </Header>
-
       <Routes>
-        <Route path="/" element={<Home setCurrentMovie={setCurrentMovie} />} />
-        <Route
-          path="/movies"
-          element={<Movies setCurrentMovie={setCurrentMovie} />}
-        />
+        <Route path="/" element={<Header />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<Movies />} />
 
-        <Route
-          path="/movies/:movieId/*"
-          element={<MovieDetails currentMovieId={currentMovieId} />}
-        ></Route>
+          <Route path="/movies/:movieId/*" element={<MovieDetails />}>
+            <Route path="cast" element={<Cast />} />
+            <Route path="reviews" element={<Reviews />} />
+          </Route>
+        </Route>
       </Routes>
     </div>
   );

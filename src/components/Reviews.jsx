@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
-
+import { useLocation } from 'react-router-dom';
 import { getMovieReviews } from 'api';
 
-export const Reviews = ({ id }) => {
+export const Reviews = () => {
   const [reviews, setReviews] = useState();
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const location = useLocation();
+
+  const movieId = location.pathname.split('/')[2];
+
   useEffect(() => {
-    getMovieReviews(id)
+    getMovieReviews(movieId)
       .then(response => {
         setReviews(response.data.results);
 
@@ -18,7 +22,7 @@ export const Reviews = ({ id }) => {
 
         setIsLoaded(false);
       });
-  }, []);
+  }, [movieId]);
 
   return isLoaded ? (
     <div>
